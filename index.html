@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SBU2 Amazing</title>
+<style>
+body {
+  margin: 0;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: white;
+  overflow: hidden;
+}
+
+.container {
+  margin-top: 120px;
+}
+
+h1 {
+  font-size: 48px;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px gold; }
+  to { text-shadow: 0 0 25px orange; }
+}
+
+#money {
+  font-size: 90px;
+  margin: 40px;
+  font-weight: bold;
+}
+
+button {
+  font-size: 22px;
+  padding: 15px 40px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: gold;
+  color: black;
+  font-weight: bold;
+}
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+.shake {
+  animation: shake 0.8s;
+}
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-10px,5px); }
+  40% { transform: translate(10px,-5px); }
+  60% { transform: translate(-10px,5px); }
+  80% { transform: translate(10px,-5px); }
+  100% { transform: translate(0,0); }
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="container">
+  <h1>🎁 SBU2 Amazing 🎁</h1>
+  <div id="money">0円</div>
+  <button id="spinBtn" onclick="startSpin()">CLICK HERE</button>
+</div>
+
+<script>
+const FINAL_AMOUNT = 3000;
+const MAX_AMOUNT = 10000;
+
+const btn = document.getElementById("spinBtn");
+const display = document.getElementById("money");
+
+if (localStorage.getItem("gift_used")) {
+  btn.disabled = true;
+  display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
+}
+
+function startSpin() {
+  btn.disabled = true;
+  localStorage.setItem("gift_used", "true");
+
+  let current = 0;
+
+  // Phase 1: tăng lên tới 1万円
+  const up = setInterval(() => {
+    current += Math.floor(Math.random() * 800) + 400;
+    if (current >= MAX_AMOUNT) {
+      current = MAX_AMOUNT;
+      clearInterval(up);
+      setTimeout(goDown, 400);
+    }
+    display.innerText = current.toLocaleString() + "円";
+  }, 60);
+}
+
+function goDown() {
+  let current = MAX_AMOUNT;
+
+  const down = setInterval(() => {
+    // giảm dần theo % khoảng cách tới đích
+    let diff = current - FINAL_AMOUNT;
+    current -= diff * 0.25;
+
+    if (diff < 5) {
+      current = FINAL_AMOUNT;
+      clearInterval(down);
+      finish();
+    }
+
+    display.innerText = Math.floor(current).toLocaleString() + "円";
+  }, 80);
+}
+
+function finish() {
+  display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
+  display.style.color = "gold";
+  display.style.textShadow = "0 0 25px gold";
+
+  document.body.classList.add("shake");
+  setTimeout(() => document.body.classList.remove("shake"), 800);
+
+  launchFireworks();
+}
+
+/* Fireworks */
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function launchFireworks() {
+  let particles = [];
+
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      angle: Math.random() * 2 * Math.PI,
+      speed: Math.random() * 6 + 2,
+      life: 100
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+      p.x += Math.cos(p.angle) * p.speed;
+      p.y += Math.sin(p.angle) * p.speed;
+      p.life--;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "hsl(" + Math.random() * 360 + ",100%,50%)";
+      ctx.fill();
+    });
+
+    particles = particles.filter(p => p.life > 0);
+
+    if (particles.length > 0) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+</script>
+
+</body>
+</html>
