@@ -7,14 +7,14 @@
 body {
   margin: 0;
   text-align: center;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #ff9ecb, #ff5fa2);
   color: white;
   overflow: hidden;
 }
 
 .container {
-  margin-top: 120px;
+  margin-top: 100px;
 }
 
 h1 {
@@ -23,8 +23,8 @@ h1 {
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 10px gold; }
-  to { text-shadow: 0 0 25px orange; }
+  from { text-shadow: 0 0 10px #fff; }
+  to { text-shadow: 0 0 30px #ff2f92; }
 }
 
 #money {
@@ -37,15 +37,15 @@ button {
   font-size: 22px;
   padding: 15px 40px;
   border: none;
-  border-radius: 10px;
+  border-radius: 30px;
   cursor: pointer;
-  background: gold;
-  color: black;
+  background: white;
+  color: #ff2f92;
   font-weight: bold;
 }
 
 button:disabled {
-  background: gray;
+  background: #ddd;
   cursor: not-allowed;
 }
 
@@ -55,10 +55,9 @@ button:disabled {
 
 @keyframes shake {
   0% { transform: translate(0,0); }
-  20% { transform: translate(-10px,5px); }
-  40% { transform: translate(10px,-5px); }
-  60% { transform: translate(-10px,5px); }
-  80% { transform: translate(10px,-5px); }
+  25% { transform: translate(-8px,4px); }
+  50% { transform: translate(8px,-4px); }
+  75% { transform: translate(-8px,4px); }
   100% { transform: translate(0,0); }
 }
 
@@ -68,6 +67,25 @@ canvas {
   left: 0;
   pointer-events: none;
 }
+
+.rose {
+  position: fixed;
+  font-size: 40px;
+  animation: float 8s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes float {
+  from { transform: translateY(100vh); }
+  to { transform: translateY(-10vh); }
+}
+
+.poem {
+  margin-top: 30px;
+  font-size: 20px;
+  line-height: 1.8;
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -75,9 +93,17 @@ canvas {
 <canvas id="fireworks"></canvas>
 
 <div class="container">
-  <h1>🎁 SBU2 Amazing 🎁</h1>
+  <h1>🌸 SBU2 Amazing 🌸</h1>
   <div id="money">0円</div>
   <button id="spinBtn" onclick="startSpin()">CLICK HERE</button>
+
+  <div class="poem" id="poem">
+    🌹<br>
+    Diệp vào phòng sáng lung linh,<br>
+    Đồng nghiệp nhìn thấy tinh thần tăng ngay.<br>
+    Tám ba chúc Diệp hôm nay,<br>
+    Sếp quên giao việc, cả ngày đi chơi!
+  </div>
 </div>
 
 <script>
@@ -86,10 +112,12 @@ const MAX_AMOUNT = 10000;
 
 const btn = document.getElementById("spinBtn");
 const display = document.getElementById("money");
+const poem = document.getElementById("poem");
 
 if (localStorage.getItem("gift_used")) {
   btn.disabled = true;
   display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
+  poem.style.display = "block";
 }
 
 function startSpin() {
@@ -98,45 +126,44 @@ function startSpin() {
 
   let current = 0;
 
-  // Phase 1: tăng lên tới 1万円
+  // Phase 1: tăng nhanh
   const up = setInterval(() => {
-    current += Math.floor(Math.random() * 800) + 400;
+    current += Math.floor(Math.random() * 900) + 400;
     if (current >= MAX_AMOUNT) {
-      current = MAX_AMOUNT;
       clearInterval(up);
-      setTimeout(goDown, 400);
+      randomFinalPhase();
     }
-    display.innerText = current.toLocaleString() + "円";
+    display.innerText = Math.min(current, MAX_AMOUNT).toLocaleString() + "円";
   }, 60);
 }
 
-function goDown() {
-  let current = MAX_AMOUNT;
+// Phase 2: nhảy loạn 1000-10000
+function randomFinalPhase() {
+  let duration = 1500;
+  let start = Date.now();
 
-  const down = setInterval(() => {
-    // giảm dần theo % khoảng cách tới đích
-    let diff = current - FINAL_AMOUNT;
-    current -= diff * 0.25;
+  const chaos = setInterval(() => {
+    let randomValue = Math.floor(Math.random() * 9000) + 1000;
+    display.innerText = randomValue.toLocaleString() + "円";
 
-    if (diff < 5) {
-      current = FINAL_AMOUNT;
-      clearInterval(down);
+    if (Date.now() - start > duration) {
+      clearInterval(chaos);
       finish();
     }
-
-    display.innerText = Math.floor(current).toLocaleString() + "円";
   }, 80);
 }
 
 function finish() {
   display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
-  display.style.color = "gold";
-  display.style.textShadow = "0 0 25px gold";
+  display.style.color = "#fff";
+  display.style.textShadow = "0 0 30px #ff2f92";
 
   document.body.classList.add("shake");
   setTimeout(() => document.body.classList.remove("shake"), 800);
 
   launchFireworks();
+  createRoses();
+  poem.style.display = "block";
 }
 
 /* Fireworks */
@@ -168,7 +195,7 @@ function launchFireworks() {
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = "hsl(" + Math.random() * 360 + ",100%,50%)";
+      ctx.fillStyle = "hsl(" + Math.random() * 360 + ",100%,60%)";
       ctx.fill();
     });
 
@@ -180,6 +207,18 @@ function launchFireworks() {
   }
 
   animate();
+}
+
+/* Floating roses */
+function createRoses() {
+  for (let i = 0; i < 10; i++) {
+    let rose = document.createElement("div");
+    rose.className = "rose";
+    rose.innerText = "🌹";
+    rose.style.left = Math.random() * 100 + "vw";
+    rose.style.animationDuration = (5 + Math.random() * 5) + "s";
+    document.body.appendChild(rose);
+  }
 }
 </script>
 
