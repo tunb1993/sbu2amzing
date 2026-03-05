@@ -8,8 +8,8 @@ body {
   margin: 0;
   text-align: center;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #ff9ecb, #ff5fa2);
-  color: white;
+  background: linear-gradient(135deg, #ffe6f0, #ffd6eb);
+  color: #d63384; /* hồng đậm để đọc rõ hơn */
   overflow: hidden;
 }
 
@@ -19,6 +19,7 @@ body {
 
 h1 {
   font-size: 48px;
+  color: #d63384;
   animation: glow 1.5s infinite alternate;
 }
 
@@ -155,8 +156,8 @@ function randomFinalPhase() {
 
 function finish() {
   display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
-  display.style.color = "#fff";
-  display.style.textShadow = "0 0 30px #ff2f92";
+  display.style.color = "#d63384";
+  display.style.textShadow = "0 0 25px #ff99cc";
 
   document.body.classList.add("shake");
   setTimeout(() => document.body.classList.remove("shake"), 800);
