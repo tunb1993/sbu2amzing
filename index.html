@@ -99,8 +99,32 @@ canvas {
   font-size: 20px;
   line-height: 1.8;
   display: none;
-  color: #6a0572; /* tím đậm dễ đọc */
+  color: #6a0572;
   font-weight: 600;
+}
+
+#subtitle {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  padding: 10px 30px;
+  border-radius: 12px;
+  max-width: 80%;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  z-index: 100;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+#subtitle.visible {
+  opacity: 1;
 }
 </style>
 </head>
@@ -111,34 +135,131 @@ canvas {
 <div class="container">
   <h1>🌸 SBU2 Amazing 🌸</h1>
   <div id="money">0円</div>
-  <button id="spinBtn" onclick="startSpin()">SPIN</button>  
+  <p id="headphoneHint" style="font-size:16px; color:#d63384; margin-bottom:10px;">🎧 Đeo tai nghe để trải nghiệm tốt nhất!</p>
+  <button id="spinBtn" onclick="startSpin()">🎵<br>SPIN</button>  
 
-  <div class="poem" id="poem">
-    🌹<br>
+  <div class="poem" id="poem"></div>
+</div>
+
+<div id="subtitle"></div>
+
+<script>
+const USERS = {
+  diep: {
+    name: "Diệp",
+    amount: 3000,
+    music: "diep.mp3",
+    subtitles: [
+      { time: 0, text: "♪ ..." },
+      { time: 5, text: "Lời bài hát dòng 1..." },
+      { time: 10, text: "Lời bài hát dòng 2..." },
+      { time: 15, text: "" }
+    ],
+    poem: `🌹<br>
     Diệp vào phòng sáng lung linh,<br>
     Đồng nghiệp nhìn thấy tinh thần tăng ngay.<br>
     Tám ba chúc Diệp hôm nay,<br>
-    Sếp quên giao việc, cả ngày đi chơi!
-  </div>
-</div>
+    Sếp quên giao việc, cả ngày đi chơi!`
+  },
+  thu: {
+    name: "Thư",
+    amount: 3000,
+    music: "thu.mp3",
+    subtitles: [
+      { time: 0, text: "♪ ..." },
+      { time: 5, text: "Lời bài hát dòng 1..." },
+      { time: 10, text: "Lời bài hát dòng 2..." },
+      { time: 15, text: "" }
+    ],
+    poem: `🌹<br>
+    Thư làm chẳng thấy kêu ca,<br>
+    Deadline dí tới vẫn cười HAHA.<br>
+    Ngày tám tháng ba thật gần,<br>
+    Chúc Thư luôn đẹp, luôn xuân trong lòng.`
+  },
+  thanh: {
+    name: "Thanh",
+    amount: 3000,
+    music: "thanh.mp3",
+    subtitles: [
+      { time: 0, text: "♪ ..." },
+      { time: 5, text: "Lời bài hát dòng 1..." },
+      { time: 10, text: "Lời bài hát dòng 2..." },
+      { time: 15, text: "" }
+    ],
+    poem: `🌹<br>
+    Thanh như gió mát đầu ngày,<br>
+    Mang theo vui vẻ đong đầy quanh ta.<br>
+    Mùng tám tháng ba đến nha,<br>
+    Chúc Thanh rạng rỡ như hoa giữa trời.`
+  }
+};
 
-<script>
-const FINAL_AMOUNT = 3000;
+const params = new URLSearchParams(window.location.search);
+const userKey = (params.get("user") || "").toLowerCase();
+const userData = USERS[userKey];
+
+if (!userData) {
+  document.querySelector(".container").innerHTML = "<h1>🌸 SBU2 Amazing 🌸</h1><p style='font-size:24px'>Không tìm thấy người nhận.<br>Vui lòng kiểm tra lại link.</p>";
+}
+
+const FINAL_AMOUNT = userData ? userData.amount : 0;
 const MAX_AMOUNT = 10000;
 
 const btn = document.getElementById("spinBtn");
 const display = document.getElementById("money");
-const poem = document.getElementById("poem");
+const poemEl = document.getElementById("poem");
 
-if (localStorage.getItem("gift_used")) {
-  btn.disabled = true;
-  display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
-  poem.style.display = "block";
+if (userData) {
+  poemEl.innerHTML = userData.poem;
+  const storageKey = "gift_used_" + userKey;
+
+  if (localStorage.getItem(storageKey)) {
+    btn.disabled = true;
+    display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
+    poemEl.style.display = "block";
+  }
+}
+
+let audio = null;
+const subtitleEl = document.getElementById("subtitle");
+
+function startSubtitles() {
+  if (!audio || !userData || !userData.subtitles) return;
+  const subs = userData.subtitles;
+
+  audio.addEventListener("timeupdate", () => {
+    const t = audio.currentTime;
+    let current = "";
+    for (let i = subs.length - 1; i >= 0; i--) {
+      if (t >= subs[i].time) {
+        current = subs[i].text;
+        break;
+      }
+    }
+    if (current) {
+      subtitleEl.textContent = current;
+      subtitleEl.classList.add("visible");
+    } else {
+      subtitleEl.classList.remove("visible");
+    }
+  });
+
+  audio.addEventListener("ended", () => {
+    subtitleEl.classList.remove("visible");
+  });
 }
 
 function startSpin() {
   btn.disabled = true;
-  localStorage.setItem("gift_used", "true");
+  const storageKey = "gift_used_" + userKey;
+  localStorage.setItem(storageKey, "true");
+
+  if (userData && userData.music) {
+    audio = new Audio(userData.music);
+    audio.play().catch(() => {});
+    startSubtitles();
+  }
 
   let current = 0;
 
@@ -179,7 +300,7 @@ function finish() {
 
   launchFireworks();
   createRoses();
-  poem.style.display = "block";
+  poemEl.style.display = "block";
 }
 
 /* Fireworks */
