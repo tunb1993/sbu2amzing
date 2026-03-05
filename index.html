@@ -35,18 +35,31 @@ h1 {
 }
 
 button {
-  font-size: 22px;
-  padding: 15px 40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
   border: none;
-  border-radius: 30px;
   cursor: pointer;
-  background: white;
-  color: #ff2f92;
+  background: radial-gradient(circle, #ff4da6, #d63384);
+  color: white;
+  font-size: 22px;
   font-weight: bold;
+  box-shadow: 0 10px 25px rgba(214,51,132,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 35px rgba(214,51,132,0.6);
+}
+
+button:active {
+  transform: scale(0.95);
 }
 
 button:disabled {
-  background: #ddd;
+  background: #ccc;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -86,6 +99,8 @@ canvas {
   font-size: 20px;
   line-height: 1.8;
   display: none;
+  color: #6a0572; /* tím đậm dễ đọc */
+  font-weight: 600;
 }
 </style>
 </head>
@@ -96,7 +111,7 @@ canvas {
 <div class="container">
   <h1>🌸 SBU2 Amazing 🌸</h1>
   <div id="money">0円</div>
-  <button id="spinBtn" onclick="startSpin()">CLICK HERE</button>
+  <button id="spinBtn" onclick="startSpin()">SPIN</button>  
 
   <div class="poem" id="poem">
     🌹<br>
