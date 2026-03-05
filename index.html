@@ -146,16 +146,16 @@ function startSpin() {
   const up = setInterval(() => {
     current += Math.floor(Math.random() * 900) + 400;
     if (current >= MAX_AMOUNT) {
-      clearInterval(up);
-      randomFinalPhase();
+       clearInterval(up);
+       setTimeout(randomFinalPhase, 1000); // treo 1 giây ở 10,000
     }
     display.innerText = Math.min(current, MAX_AMOUNT).toLocaleString() + "円";
-  }, 60);
+  }, 100);
 }
 
 // Phase 2: nhảy loạn 1000-10000
 function randomFinalPhase() {
-  let duration = 1500;
+  let duration = 5000;
   let start = Date.now();
 
   const chaos = setInterval(() => {
