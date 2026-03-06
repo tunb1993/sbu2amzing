@@ -2,25 +2,37 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>SBU2 Amazing</title>
 <style>
+* { box-sizing: border-box; }
+
 body {
   margin: 0;
   text-align: center;
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #ffe6f0, #ffd6eb);
-  color: #d63384; /* hồng đậm để đọc rõ hơn */
-  overflow: hidden;
+  color: #d63384;
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .container {
-  margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px;
 }
 
 h1 {
-  font-size: 48px;
+  font-size: clamp(28px, 7vw, 48px);
   color: #d63384;
   animation: glow 1.5s infinite alternate;
+  margin: 0 0 10px;
 }
 
 @keyframes glow {
@@ -29,23 +41,30 @@ h1 {
 }
 
 #money {
-  font-size: 90px;
-  margin: 40px;
+  font-size: clamp(48px, 15vw, 90px);
+  margin: 20px 0;
   font-weight: bold;
 }
 
+#headphoneHint {
+  font-size: clamp(13px, 3.5vw, 16px);
+  color: #d63384;
+  margin: 0 0 15px;
+}
+
 button {
-  width: 140px;
-  height: 140px;
+  width: clamp(100px, 28vw, 140px);
+  height: clamp(100px, 28vw, 140px);
   border-radius: 50%;
   border: none;
   cursor: pointer;
   background: radial-gradient(circle, #ff4da6, #d63384);
   color: white;
-  font-size: 22px;
+  font-size: clamp(16px, 4.5vw, 22px);
   font-weight: bold;
   box-shadow: 0 10px 25px rgba(214,51,132,0.4);
   transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:hover {
@@ -80,13 +99,15 @@ canvas {
   top: 0;
   left: 0;
   pointer-events: none;
+  z-index: 10;
 }
 
 .rose {
   position: fixed;
-  font-size: 40px;
+  font-size: clamp(24px, 8vw, 40px);
   animation: float 8s linear infinite;
   opacity: 0.8;
+  z-index: 5;
 }
 
 @keyframes float {
@@ -95,36 +116,35 @@ canvas {
 }
 
 .poem {
-  margin-top: 30px;
-  font-size: 20px;
+  margin: 25px auto 0;
+  font-size: clamp(15px, 4vw, 20px);
   line-height: 1.8;
   display: none;
   color: #6a0572;
   font-weight: 600;
+  max-width: 500px;
+  padding: 0 10px;
 }
 
-#subtitle {
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.65);
+#giftLink {
+  display: none;
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #ff9a00, #ff6f00);
   color: #fff;
-  font-size: 22px;
-  font-weight: 600;
-  padding: 10px 30px;
-  border-radius: 12px;
-  max-width: 80%;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 0.4s;
-  pointer-events: none;
-  z-index: 100;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  font-size: clamp(14px, 4vw, 18px);
+  font-weight: bold;
+  border: none;
+  border-radius: 30px;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(255,111,0,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-#subtitle.visible {
-  opacity: 1;
+#giftLink:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255,111,0,0.6);
 }
 </style>
 </head>
@@ -135,13 +155,14 @@ canvas {
 <div class="container">
   <h1>🌸 SBU2 Amazing 🌸</h1>
   <div id="money">0円</div>
-  <p id="headphoneHint" style="font-size:16px; color:#d63384; margin-bottom:10px;">🎧 Đeo tai nghe để trải nghiệm tốt nhất!</p>
-  <button id="spinBtn" onclick="startSpin()">🎵<br>SPIN</button>  
+  <p id="headphoneHint">🎧 Đeo tai nghe để trải nghiệm tốt nhất!</p>
+  <button id="spinBtn" onclick="startSpin()">🎵<br>SPIN</button>
+
+  <button id="musicBtn" onclick="toggleMusic()" style="display:none; width:50px; height:50px; font-size:22px; margin-top:15px; padding:0;">⏸️</button>
 
   <div class="poem" id="poem"></div>
+  <a id="giftLink" href="#" target="_blank">🎁 Nhận quà tại đây</a>
 </div>
-
-<div id="subtitle"></div>
 
 <script>
 const USERS = {
@@ -149,28 +170,18 @@ const USERS = {
     name: "Diệp",
     amount: 3000,
     music: "diep.mp3",
-    subtitles: [
-      { time: 0, text: "♪ ..." },
-      { time: 5, text: "Lời bài hát dòng 1..." },
-      { time: 10, text: "Lời bài hát dòng 2..." },
-      { time: 15, text: "" }
-    ],
+    giftLink: "https://www.amazon.co.jp/dp/XXXXX",
     poem: `🌹<br>
     Diệp cười rạng rỡ lung linh,<br>
     Chủ nhật mùng tám, tâm tình thêm vui.<br>
-    Tám ba chúc Diệp hôm nay,<br>
-    Sếp quên giao việc, cả ngày đi chơi!`
+    Tám ba chúc Diệp xinh tươi,<br>
+    Sếp không giao việc, thảnh thơi cả ngày!`
   },
   thu: {
     name: "Thư",
     amount: 3000,
     music: "thu.mp3",
-    subtitles: [
-      { time: 0, text: "♪ ..." },
-      { time: 5, text: "Lời bài hát dòng 1..." },
-      { time: 10, text: "Lời bài hát dòng 2..." },
-      { time: 15, text: "" }
-    ],
+    giftLink: "https://www.amazon.co.jp/dp/XXXXX",
     poem: `🌹<br>
     Thư làm chẳng thấy kêu ca,<br>
     Deadline dí tới vẫn cười HAHA.<br>
@@ -181,12 +192,7 @@ const USERS = {
     name: "Thanh",
     amount: 3000,
     music: "thanh.mp3",
-    subtitles: [
-      { time: 0, text: "♪ ..." },
-      { time: 5, text: "Lời bài hát dòng 1..." },
-      { time: 10, text: "Lời bài hát dòng 2..." },
-      { time: 15, text: "" }
-    ],
+    giftLink: "https://www.amazon.co.jp/dp/XXXXX",
     poem: `🌹<br>
     Thanh như gió mát đầu ngày,<br>
     Mang theo vui vẻ đong đầy quanh ta.<br>
@@ -200,7 +206,8 @@ const userKey = (params.get("user") || "").toLowerCase();
 const userData = USERS[userKey];
 
 if (!userData) {
-  document.querySelector(".container").innerHTML = "<h1>🌸 SBU2 Amazing 🌸</h1><p style='font-size:24px'>Không tìm thấy người nhận.<br>Vui lòng kiểm tra lại link.</p>";
+  document.querySelector(".container").innerHTML =
+    "<h1>🌸 SBU2 Amazing 🌸</h1><p style='font-size:clamp(16px,4vw,24px)'>Không tìm thấy người nhận.<br>Vui lòng kiểm tra lại link.</p>";
 }
 
 const FINAL_AMOUNT = userData ? userData.amount : 0;
@@ -210,45 +217,22 @@ const btn = document.getElementById("spinBtn");
 const display = document.getElementById("money");
 const poemEl = document.getElementById("poem");
 
+const giftLinkEl = document.getElementById("giftLink");
+
 if (userData) {
   poemEl.innerHTML = userData.poem;
+  if (userData.giftLink) giftLinkEl.href = userData.giftLink;
   const storageKey = "gift_used_" + userKey;
 
   if (localStorage.getItem(storageKey)) {
     btn.disabled = true;
     display.innerText = FINAL_AMOUNT.toLocaleString() + "円";
     poemEl.style.display = "block";
+    if (userData.giftLink) giftLinkEl.style.display = "inline-block";
   }
 }
 
 let audio = null;
-const subtitleEl = document.getElementById("subtitle");
-
-function startSubtitles() {
-  if (!audio || !userData || !userData.subtitles) return;
-  const subs = userData.subtitles;
-
-  audio.addEventListener("timeupdate", () => {
-    const t = audio.currentTime;
-    let current = "";
-    for (let i = subs.length - 1; i >= 0; i--) {
-      if (t >= subs[i].time) {
-        current = subs[i].text;
-        break;
-      }
-    }
-    if (current) {
-      subtitleEl.textContent = current;
-      subtitleEl.classList.add("visible");
-    } else {
-      subtitleEl.classList.remove("visible");
-    }
-  });
-
-  audio.addEventListener("ended", () => {
-    subtitleEl.classList.remove("visible");
-  });
-}
 
 function startSpin() {
   btn.disabled = true;
@@ -258,23 +242,36 @@ function startSpin() {
   if (userData && userData.music) {
     audio = new Audio(userData.music);
     audio.play().catch(() => {});
-    startSubtitles();
+    document.getElementById("musicBtn").style.display = "inline-block";
+    audio.addEventListener("ended", () => {
+      document.getElementById("musicBtn").style.display = "none";
+    });
   }
 
   let current = 0;
 
-  // Phase 1: tăng nhanh
   const up = setInterval(() => {
     current += Math.floor(Math.random() * 900) + 400;
     if (current >= MAX_AMOUNT) {
        clearInterval(up);
-       setTimeout(randomFinalPhase, 1000); // treo 1 giây ở 10,000
+       setTimeout(randomFinalPhase, 1000);
     }
     display.innerText = Math.min(current, MAX_AMOUNT).toLocaleString() + "円";
   }, 100);
 }
 
-// Phase 2: nhảy loạn 1000-10000
+function toggleMusic() {
+  if (!audio) return;
+  const btn = document.getElementById("musicBtn");
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = "⏸️";
+  } else {
+    audio.pause();
+    btn.textContent = "▶️";
+  }
+}
+
 function randomFinalPhase() {
   let duration = 5000;
   let start = Date.now();
@@ -301,13 +298,18 @@ function finish() {
   launchFireworks();
   createRoses();
   poemEl.style.display = "block";
+  if (userData && userData.giftLink) giftLinkEl.style.display = "inline-block";
 }
 
-/* Fireworks */
 const canvas = document.getElementById("fireworks");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 function launchFireworks() {
   let particles = [];
@@ -346,7 +348,6 @@ function launchFireworks() {
   animate();
 }
 
-/* Floating roses */
 function createRoses() {
   for (let i = 0; i < 10; i++) {
     let rose = document.createElement("div");
